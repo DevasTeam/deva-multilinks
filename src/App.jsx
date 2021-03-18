@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import './App.css';
 import { Input, Button } from 'antd';
 import 'antd/dist/antd.css';
+import axios from 'axios';
 
 const { TextArea } = Input;
 
@@ -14,32 +15,14 @@ function App() {
 
     const linksToShort = links.split('\n');
 
-    const shortenedLinks = [];
-
-    const makeShortLink = link => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                fetch(`https://clck.ru/--?url=${encodeURIComponent(link)}`)
-                    .then(res => res.text())
-                    .then(shortLink => {
-                        resolve(shortLink);
-                    });
-            }, 200);
-        });
-    };
-
-    // (async () => {
-        for (let i = 0; i < linksToShort.length; i++) {
-            const link = linksToShort[i];
-            const shortenedLink = await makeShortLink(link);
-
-            shortenedLinks.push(shortenedLink);
-        }
-    // })();
-
-    // window.shortenedLinks = shortenedLinks;
-    setLinks(shortenedLinks.join('\n'));
-    setLoading(false);
+    axios.post('https://multilinks-api.herokuapp.com/shortByISGD', {
+      linksToShort
+    })
+    .then(({ data: shortenedLinks }) => {
+      setLinks(shortenedLinks.join('\n'));
+      setLoading(false);
+    })
+    .catch(console.log);
   }, [links]);
 
   return (
